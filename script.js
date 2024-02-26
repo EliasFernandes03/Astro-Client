@@ -1,5 +1,5 @@
 
-function listarEventos() {
+function listEvents() {
     fetch('http://localhost:8000/api/events')
         .then(response => response.json())
         .then(data => {
@@ -13,7 +13,7 @@ function listarEventos() {
                             <td>${item.created_at}</td>
                             <td>
                                 <button class="btn btn-primary btn-sm btn-edit" data-id="${item.id}" onclick="renderModalEdit(${item.id}, '${item.name}', '${item.description}')">edit</button>
-                                <button class="btn btn-danger btn-sm btn-delete" data-id="${item.id}"onclick="renderModalExcluir(${item.id})">Delete</button>
+                                <button class="btn btn-danger btn-sm btn-delete" data-id="${item.id}"onclick="renderDeleteModal(${item.id})">Delete</button>
                             </td>
                         </tr>`;
                 tableBody.insertAdjacentHTML('beforeend', row);
@@ -22,16 +22,18 @@ function listarEventos() {
         .catch(error => console.error('Erro:', error));
 }
 
-listarEventos(); 
+listEvents(); 
 
-function renderModalExcluir(id) {
+let modalCount = 0;
+
+function renderDeleteModal(id) {
     let modal = `
-        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="confirmDeleteModal_${modalCount}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Confirmar exclusão</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="fecharModal('confirmDeleteModal')">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('confirmDeleteModal_${modalCount}')">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -39,8 +41,8 @@ function renderModalExcluir(id) {
                         Tem certeza de que deseja excluir este evento?
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="fecharModal('confirmDeleteModal')">Não</button>
-                        <button type="button" class="btn btn-danger" onclick="DeleteEvento(${id})" data-dismiss="modal">Sim</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModal('confirmDeleteModal_${modalCount}')">Não</button>
+                        <button type="button" class="btn btn-danger" onclick="DeleteEvent(${id}, 'confirmDeleteModal_${modalCount}')">Sim</button>
                     </div>
                 </div>
             </div>
@@ -49,30 +51,30 @@ function renderModalExcluir(id) {
 
     document.body.insertAdjacentHTML('beforeend', modal);
 
-    let modalElement = document.getElementById('confirmDeleteModal');
+    let modalElement = document.getElementById(`confirmDeleteModal_${modalCount}`);
     modalElement.classList.add('show');
     modalElement.style.display = 'block';
     document.body.classList.add('modal-open');
+
+    modalCount++; 
 }
 
-
-function DeleteEvento(id) {
+function DeleteEvent(id, modalId) {
     fetch(`http://localhost:8000/api/events/${id}`, {
         method: 'DELETE'
     })
     .then(response => {
         if (response.ok) {
             console.log(`Evento com ID ${id} deletado com sucesso.`);
-            
-        listarEventos();
+            listEvents();
         } else {
-            console.error('Falha ao Delete o evento.');
+            console.error('Falha ao deletar o evento.');
         }
     })
     .catch(error => console.error('Erro:', error));
-    fecharModal('confirmDeleteModal')
-}
 
+    closeModal(modalId);
+}
 
 function renderModalEdit(id, name, description) {
     console.log(name,description)
@@ -82,7 +84,7 @@ function renderModalEdit(id, name, description) {
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="editModalLabel">edit Evento</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="fecharModal('editModal')">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('editModal')">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -99,8 +101,8 @@ function renderModalEdit(id, name, description) {
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick="fecharModal('editModal')">Cancelar</button>
-                        <button type="button" class="btn btn-primary" onclick="atualizarEvento(${id})">Atualizar</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="updateEvent(${id})">Atualizar</button>
                     </div>
                 </div>
             </div>
@@ -114,7 +116,7 @@ function renderModalEdit(id, name, description) {
     document.body.classList.add('modal-open');
 }
 
-function atualizarEvento(id) {
+function updateEvent(id) {
     var eventName = document.getElementById('eventName').value;
     var eventDescription = document.getElementById('eventDescription').value;
 
@@ -131,7 +133,7 @@ function atualizarEvento(id) {
     .then(response => {
         if (response.ok) {
             console.log(`Evento com ID ${id} atualizado com sucesso.`);
-            listarEventos()
+            listEvents()
         } else {
             console.error('Falha ao atualizar o evento.');
         }
@@ -142,32 +144,32 @@ function atualizarEvento(id) {
     modalElement.remove();
 }
 
-function renderModalCriar() {
+function renderCreateModal() {
     var modal = `
-        <div class="modal fade" id="criarModal" tabindex="-1" role="dialog" aria-labelledby="criarModalLabel" aria-hidden="true">
+        <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="criarModalLabel">Criar Novo Evento</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="fecharModal('criarModal')">
+                        <h5 class="modal-title" id="createModalLabel">Create New Event</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('createModal')">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form id="criarForm">
+                        <form id="createForm">
                             <div class="form-group">
-                                <label for="newEventName">Nome do Evento</label>
+                                <label for="newEventName">Event Name</label>
                                 <input type="text" class="form-control" id="newEventName">
                             </div>
                             <div class="form-group">
-                                <label for="newEventDescription">Descrição do Evento</label>
+                                <label for="newEventDescription">Event Description</label>
                                 <textarea class="form-control" id="newEventDescription" rows="3"></textarea>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick="fecharModal('criarModal')">Cancelar</button>
-                        <button type="button" class="btn btn-success" onclick="criarNovoEvento()">Salvar</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('createModal')">Cancel</button>
+                        <button type="button" class="btn btn-success" onclick="createNewEvent()">Save</button>
                     </div>
                 </div>
             </div>
@@ -175,18 +177,17 @@ function renderModalCriar() {
     `;
 
     document.body.insertAdjacentHTML('beforeend', modal);
-
-    var modalElement = document.getElementById('criarModal');
+    document.getElementById('newEventName').value = '';
+    document.getElementById('newEventDescription').value = '';
+    var modalElement = document.getElementById('createModal');
     modalElement.classList.add('show');
     modalElement.style.display = 'block';
     document.body.classList.add('modal-open');
 }
 
-
-function criarNovoEvento() {
+function createNewEvent() {
     var newEventName = document.getElementById('newEventName').value;
     var newEventDescription = document.getElementById('newEventDescription').value;
-
 
     fetch('http://localhost:8000/api/events', {
         method: 'POST',
@@ -200,18 +201,19 @@ function criarNovoEvento() {
     })
     .then(response => {
         if (response.ok) {
-            console.log('Novo evento criado com sucesso.');
-            listarEventos()
-            fecharModal('criarModal');
+            console.log('New event created successfully.');
+            listEvents();
+            closeModal('createModal');
 
         } else {
-            console.error('Falha ao criar o novo evento.');
+            console.error('Failed to create new event.');
         }
     })
-    .catch(error => console.error('Erro:', error));
+    .catch(error => console.error('Error:', error));
 }
 
-function fecharModal(modalId) {
+
+function closeModal(modalId) {
     var modalElement = document.getElementById(modalId);
     modalElement.classList.remove('show');
     modalElement.style.display = 'none';
