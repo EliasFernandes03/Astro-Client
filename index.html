@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>Dados da API Laravel</h1>
+    <div id="body"class="container mt-5">
+        <h1>To Do List Data</h1>
         <table class="table">
             <thead>
                 <tr>
@@ -16,6 +16,7 @@
                     <th>Name</th>
                     <th>Description</th>
                     <th>Created At</th>
+                    <th><button class="btn btn-success btn-sm" onclick="renderCreateModal()">Create</button></th>
                 </tr>
             </thead>
             <tbody id="data">
