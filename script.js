@@ -1,4 +1,5 @@
 
+// List Event
 function listEvents() {
     fetch('http://localhost:8000/api/events')
         .then(response => response.json())
@@ -23,6 +24,8 @@ function listEvents() {
 }
 
 listEvents(); 
+
+// Delete Event
 
 let modalCount = 0;
 
@@ -75,6 +78,8 @@ function DeleteEvent(id, modalId) {
 
     closeModal(modalId);
 }
+
+// Edit Event
 
 function renderModalEdit(id, name, description) {
     console.log(name,description)
@@ -144,6 +149,7 @@ function updateEvent(id) {
     modalElement.remove();
 }
 
+// Create Event
 function renderCreateModal() {
     var modal = `
         <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
