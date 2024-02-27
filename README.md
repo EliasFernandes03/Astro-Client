@@ -3,7 +3,7 @@ This is a frontend interface to consume the Astro API
 
 ## Technologies
 
-- To run this project you will need `vscode` and live `server extension`
+- To run this project you will need `vscode` and  `live server `extension
 
 ## Usage
 - You will need the backend system running, check if is running.
